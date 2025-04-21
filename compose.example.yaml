@@ -1,19 +1,23 @@
-version: '3.8'
+version: "3.8"
 
 services:
   secrets-manager:
     image: gchr.io/dinvlad/docker-secrets-manager:main
+    restart: unless-stopped
+    build: .
     devices:
-     - /dev/tpmrm0
+      - /dev/tpmrm0
     volumes:
-      - ./secrets.env:/app/secrets.env:ro
-    network_mode: container:app
+      - ./secrets.example.env:/app/secrets.env:ro
+    network_mode: service:app
 
   app:
     image: alpine
+    restart: unless-stopped
     command: >-
       sh -c "
+        sleep 5 &&
         apk add curl &&
-        curl localhost:8181/SECRET -H "X-Secret-Request: true" &&
+        curl localhost:8181/SECRET -H 'X-Secret-Request: true' &&
         exec sleep infinity
       "
